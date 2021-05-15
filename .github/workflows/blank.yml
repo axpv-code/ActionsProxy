@@ -1,0 +1,29 @@
+name: Start ShadowSocks
+
+on:  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install SS
+        run: |
+          sudo apt-get remove docker docker-engine docker.io containerd runc
+          sudo systemctl start docker
+          docker run -dt --name ssserver -p 6443:6443 -p 6500:6500/udp mritd/shadowsocks -m "ss-server" -s "-s 0.0.0.0 -p 6443 -m chacha20-ietf-poly1305 -k test123" -x -e "kcpserver" -k "-t 127.0.0.1:6443 -l :6500 -mode fast2"
+
+      - name: Use frp
+        run: |
+          echo "[common]
+          server_addr = 158.101.145.145
+          server_port = 7000
+          token = freefrp.net
+          
+          [ss]
+          type = tcp
+          local_ip = 127.0.0.1
+          local_port = 6443
+          remote_port = 25979" > frpc.ini
+          ./frpc -c ./frpc.ini
+          echo test, and deploy your project.
