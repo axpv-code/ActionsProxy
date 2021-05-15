@@ -1,0 +1,36 @@
+name: SSR-Proxy
+
+on:
+  schedule:
+    - cron:  '43 1,9,17 * * *'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSR
+        run: |
+          sudo apt-get remove docker docker-engine docker.io containerd runc
+          sudo systemctl start docker
+          docker run -d --name ssr-with-net-speeder -p 8989:8989 malaohu/ssr-with-net-speeder -s 0.0.0.0 -p 8989 -k 123456 -m aes-256-cfb -o plain -O origin
+
+      - name: Run a multi-line script
+        run: |
+          wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz
+          tar xzvf frp_0.36.2_linux_amd64.tar.gz
+          cd frp_0.36.2_linux_amd64
+          echo "[common]
+          server_addr = 158.101.145.145
+          server_port = 7000
+          token = freefrp.net
+          
+          [ssr]
+          type = tcp
+          local_ip = 127.0.0.1
+          local_port = 8989
+          remote_port = 44974" > frpc.ini
+          ./frpc -c ./frpc.ini
