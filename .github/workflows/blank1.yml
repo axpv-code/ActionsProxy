@@ -27,7 +27,7 @@ jobs:
           server_port = 7000
           token = freefrp.net
           
-          [ssr]
+          [ssraaa]
           type = tcp
           local_ip = 127.0.0.1
           local_port = 8989
